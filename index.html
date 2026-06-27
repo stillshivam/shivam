@@ -215,7 +215,12 @@
         for(let i=0;i<120;i++)particles.push(new P());document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
         function animBg(){bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<130){bgCtx.beginPath();bgCtx.moveTo(particles[i].x,particles[i].y);bgCtx.lineTo(particles[j].x,particles[j].y);bgCtx.strokeStyle=`rgba(120,140,255,${0.04*(1-dist/130)})`;bgCtx.lineWidth=0.5;bgCtx.stroke()}}}particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(animBg)}animBg();
 
-        // ============ SMOOTH GRAPH + TOTAL ONLY INCREASES + RESET 12:30 AM ============
+        // ============ JSONBIN SYNCED GRAPH ============
+        const BIN_ID="6a401835f5f4af5e2939f596";
+        const API_KEY="$2a$10$fifT969OKEux4wGqRzOoZuG4Mn4sK72zXtlZxOvXhO1Z/TgvoyBwO";
+        const BIN_URL=`https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        const HEADERS={"X-Master-Key":API_KEY,"Content-Type":"application/json"};
+
         const graphCanvas=document.getElementById('liveGraphCanvas'),gCtx=graphCanvas.getContext('2d');
         const graphWrap=document.getElementById('graphWrap'),tooltip=document.getElementById('graphTooltip');
         const ttTime=document.getElementById('ttTime'),ttVal=document.getElementById('ttVal');
@@ -225,13 +230,54 @@
         function resizeG(){const w=graphWrap.clientWidth,h=graphWrap.clientHeight;const dpr=window.devicePixelRatio||1;graphCanvas.width=w*dpr;graphCanvas.height=h*dpr;graphCanvas.style.width=w+'px';graphCanvas.style.height=h+'px';gCtx.setTransform(dpr,0,0,dpr,0,0)}
         resizeG();window.addEventListener('resize',()=>{resizeG();drawGraph()});
 
-        const now=Date.now();
-        for(let i=0;i<MAX_PTS;i++){const val=8000+Math.floor(Math.random()*8000);dataPoints.push(val);targetPoints.push(val);timestamps.push(now-(MAX_PTS-1-i)*1000)}
+        let totalToday=0,lastTotalToday=0;
+        let isFirstDevice=!sessionStorage.getItem('syncedBefore');
 
-        let totalToday=parseInt(localStorage.getItem('totalToday')||Math.floor(Math.random()*50000)+70000);
-        let lastResetDate=localStorage.getItem('lastResetDate')||'';
-        function checkReset(){const now=new Date();const today=now.toISOString().split('T')[0];const resetTime=new Date(now);resetTime.setHours(0,30,0,0);if(now>=resetTime&&lastResetDate!==today){totalToday=70000+Math.floor(Math.random()*2000);lastResetDate=today;localStorage.setItem('totalToday',totalToday);localStorage.setItem('lastResetDate',lastResetDate)}}
-        checkReset();document.getElementById('totalToday').textContent=totalToday.toLocaleString();
+        // Initial data fetch from JSONBin
+        async function fetchData(){
+            try{
+                const res=await fetch(`${BIN_URL}/latest`,{headers:HEADERS});
+                const json=await res.json();
+                const d=json.record;
+                if(d&&d.dataPoints&&d.dataPoints.length>0){
+                    dataPoints=d.dataPoints;targetPoints=[...d.dataPoints];
+                    timestamps=d.timestamps||[];
+                    if(timestamps.length!==dataPoints.length){
+                        timestamps=[];const now=Date.now();
+                        for(let i=0;i<dataPoints.length;i++)timestamps.push(now-(dataPoints.length-1-i)*1000);
+                    }
+                    totalToday=d.totalToday||(70000+Math.floor(Math.random()*50000));
+                    lastTotalToday=totalToday;
+                }
+            }catch(e){console.log('Fetch failed, using local');}
+            if(dataPoints.length===0){
+                const now=Date.now();
+                for(let i=0;i<MAX_PTS;i++){const val=8000+Math.floor(Math.random()*8000);dataPoints.push(val);targetPoints.push(val);timestamps.push(now-(MAX_PTS-1-i)*1000)}
+                totalToday=70000+Math.floor(Math.random()*50000);
+            }
+            document.getElementById('totalToday').textContent=totalToday.toLocaleString();
+            drawGraph();
+        }
+
+        // Push data to JSONBin
+        async function pushData(){
+            try{
+                const payload={dataPoints:targetPoints,timestamps:timestamps,totalToday:totalToday};
+                await fetch(BIN_URL,{method:'PUT',headers:HEADERS,body:JSON.stringify(payload)});
+            }catch(e){console.log('Push failed');}
+        }
+
+        // Check midnight reset
+        function checkReset(){
+            const now=new Date();const today=now.toISOString().split('T')[0];
+            const resetTime=new Date(now);resetTime.setHours(0,30,0,0);
+            if(now>=resetTime&&lastTotalToday>120000){
+                totalToday=70000+Math.floor(Math.random()*2000);
+                lastTotalToday=totalToday;
+            }
+        }
+
+        fetchData();
 
         let cursorX=null,cursorY=null,cursorIn=false;
         graphWrap.addEventListener('mousemove',e=>{const r=graphWrap.getBoundingClientRect();cursorX=e.clientX-r.left;cursorY=e.clientY-r.top;cursorIn=true});
@@ -242,6 +288,7 @@
         function getSmoothTarget(prev){const change=(Math.random()-0.48)*2500;return Math.max(3000,Math.min(22000,prev+change))}
 
         function drawGraph(){
+            if(dataPoints.length===0)return;
             const w=graphWrap.clientWidth,h=graphWrap.clientHeight;gCtx.clearRect(0,0,w,h);
             const pad={top:30,right:20,bottom:30,left:55},pw=w-pad.left-pad.right,ph=h-pad.top-pad.bottom,maxV=22000,minV=3000;
             const borderColor=getComputedStyle(document.documentElement).getPropertyValue('--glass-border').trim()||'rgba(255,255,255,0.04)';
@@ -252,15 +299,54 @@
             gCtx.beginPath();dataPoints.forEach((val,i)=>{const x=pad.left+(pw/(dataPoints.length-1))*i;const y=pad.top+ph-((val-minV)/(maxV-minV))*ph;if(i===0)gCtx.moveTo(x,y);else gCtx.lineTo(x,y)});gCtx.lineTo(pad.left+pw,h-pad.bottom);gCtx.lineTo(pad.left,h-pad.bottom);gCtx.closePath();gCtx.fillStyle=grad;gCtx.fill();
             gCtx.beginPath();dataPoints.forEach((val,i)=>{const x=pad.left+(pw/(dataPoints.length-1))*i;const y=pad.top+ph-((val-minV)/(maxV-minV))*ph;if(i===0)gCtx.moveTo(x,y);else gCtx.lineTo(x,y)});gCtx.strokeStyle='rgba(155,93,229,0.9)';gCtx.lineWidth=3;gCtx.shadowColor='rgba(155,93,229,0.5)';gCtx.shadowBlur=16;gCtx.stroke();gCtx.shadowBlur=0;
             const lastVal=dataPoints[dataPoints.length-1];const lx=pad.left+pw,ly=pad.top+ph-((lastVal-minV)/(maxV-minV))*ph;gCtx.beginPath();gCtx.arc(lx,ly,6,0,Math.PI*2);gCtx.fillStyle='#fff';gCtx.fill();gCtx.beginPath();gCtx.arc(lx,ly,16,0,Math.PI*2);gCtx.fillStyle='rgba(155,93,229,0.35)';gCtx.fill();gCtx.beginPath();gCtx.arc(lx,ly,28,0,Math.PI*2);gCtx.fillStyle='rgba(155,93,229,0.1)';gCtx.fill();
-            if(cursorIn&&cursorX!==null){let nearestIdx=0,nearestDist=Infinity;dataPoints.forEach((val,i)=>{const x=pad.left+(pw/(dataPoints.length-1))*i;const y=pad.top+ph-((val-minV)/(maxV-minV))*ph;const dist=Math.sqrt((cursorX-x)**2+(cursorY-y)**2);if(dist<nearestDist){nearestDist=dist;nearestIdx=i}});const nx=pad.left+(pw/(dataPoints.length-1))*nearestIdx;const ny=pad.top+ph-((dataPoints[nearestIdx]-minV)/(maxV-minV))*ph;gCtx.strokeStyle='rgba(255,255,255,0.2)';gCtx.lineWidth=1;gCtx.setLineDash([4,6]);gCtx.beginPath();gCtx.moveTo(nx,pad.top);gCtx.lineTo(nx,h-pad.bottom);gCtx.stroke();gCtx.setLineDash([]);gCtx.beginPath();gCtx.arc(nx,ny,7,0,Math.PI*2);gCtx.fillStyle='#fff';gCtx.fill();gCtx.beginPath();gCtx.arc(nx,ny,18,0,Math.PI*2);gCtx.fillStyle='rgba(255,255,255,0.2)';gCtx.fill();const timeDiff=Math.round((timestamps[nearestIdx]-now)/1000);ttTime.textContent=timeDiff===0?'Now':timeDiff+'s ago';ttVal.textContent=Math.round(dataPoints[nearestIdx]).toLocaleString();const tooltipX=Math.min(nx+16,w-160);const tooltipY=Math.max(ny-60,10);tooltip.style.left=tooltipX+'px';tooltip.style.top=tooltipY+'px';tooltip.style.opacity='1'}
+            if(cursorIn&&cursorX!==null){let nearestIdx=0,nearestDist=Infinity;dataPoints.forEach((val,i)=>{const x=pad.left+(pw/(dataPoints.length-1))*i;const y=pad.top+ph-((val-minV)/(maxV-minV))*ph;const dist=Math.sqrt((cursorX-x)**2+(cursorY-y)**2);if(dist<nearestDist){nearestDist=dist;nearestIdx=i}});const nx=pad.left+(pw/(dataPoints.length-1))*nearestIdx;const ny=pad.top+ph-((dataPoints[nearestIdx]-minV)/(maxV-minV))*ph;gCtx.strokeStyle='rgba(255,255,255,0.2)';gCtx.lineWidth=1;gCtx.setLineDash([4,6]);gCtx.beginPath();gCtx.moveTo(nx,pad.top);gCtx.lineTo(nx,h-pad.bottom);gCtx.stroke();gCtx.setLineDash([]);gCtx.beginPath();gCtx.arc(nx,ny,7,0,Math.PI*2);gCtx.fillStyle='#fff';gCtx.fill();gCtx.beginPath();gCtx.arc(nx,ny,18,0,Math.PI*2);gCtx.fillStyle='rgba(255,255,255,0.2)';gCtx.fill();const timeDiff=Math.round((timestamps[nearestIdx]-Date.now())/1000);ttTime.textContent=timeDiff===0?'Now':timeDiff+'s ago';ttVal.textContent=Math.round(dataPoints[nearestIdx]).toLocaleString();const tooltipX=Math.min(nx+16,w-160);const tooltipY=Math.max(ny-60,10);tooltip.style.left=tooltipX+'px';tooltip.style.top=tooltipY+'px';tooltip.style.opacity='1'}
         }
 
         let lastFrameTime=0;
         function smoothTransition(timestamp){if(!lastFrameTime)lastFrameTime=timestamp;const dt=Math.min((timestamp-lastFrameTime)/1000,0.1);lastFrameTime=timestamp;let allDone=true;for(let i=0;i<dataPoints.length;i++){const diff=targetPoints[i]-dataPoints[i];if(Math.abs(diff)>0.5){dataPoints[i]+=diff*Math.min(dt*8,1);allDone=false}else{dataPoints[i]=targetPoints[i]}}drawGraph();if(!allDone){animationFrame=requestAnimationFrame(smoothTransition);isAnimating=true}else{isAnimating=false}}
         function startSmoothAnimation(){if(!isAnimating){lastFrameTime=0;animationFrame=requestAnimationFrame(smoothTransition)}}
 
-        function updateGraph(){for(let i=1;i<targetPoints.length;i++)targetPoints[i-1]=targetPoints[i];const last=targetPoints[targetPoints.length-1];targetPoints[targetPoints.length-1]=getSmoothTarget(last);for(let i=1;i<timestamps.length;i++)timestamps[i-1]=timestamps[i];timestamps[timestamps.length-1]=Date.now();const newVal=Math.round(targetPoints[targetPoints.length-1]);document.getElementById('currentVisitors').textContent=newVal.toLocaleString();const pct=((targetPoints[targetPoints.length-1]-last)/last*100).toFixed(1);const ce=document.getElementById('changePercent');ce.textContent=(pct>0?'+':'')+pct+'%';ce.className='stat-val '+(pct>=0?'up':'down');totalToday+=Math.floor(Math.random()*25)+5;localStorage.setItem('totalToday',totalToday);document.getElementById('totalToday').textContent=totalToday.toLocaleString();startSmoothAnimation()}
-        drawGraph();setInterval(updateGraph,1000);setInterval(checkReset,60000);
+        async function updateGraph(){
+            if(isFirstDevice&&dataPoints.length>0){
+                for(let i=1;i<targetPoints.length;i++)targetPoints[i-1]=targetPoints[i];
+                const last=targetPoints[targetPoints.length-1];targetPoints[targetPoints.length-1]=getSmoothTarget(last);
+                for(let i=1;i<timestamps.length;i++)timestamps[i-1]=timestamps[i];timestamps[timestamps.length-1]=Date.now();
+                const newVal=Math.round(targetPoints[targetPoints.length-1]);document.getElementById('currentVisitors').textContent=newVal.toLocaleString();
+                const pct=((targetPoints[targetPoints.length-1]-last)/last*100).toFixed(1);
+                const ce=document.getElementById('changePercent');ce.textContent=(pct>0?'+':'')+pct+'%';ce.className='stat-val '+(pct>=0?'up':'down');
+                totalToday+=Math.floor(Math.random()*25)+5;document.getElementById('totalToday').textContent=totalToday.toLocaleString();
+                startSmoothAnimation();await pushData();
+            }
+            checkReset();
+        }
+
+        // Sync from JSONBin every 2 seconds
+        async function syncFromServer(){
+            try{
+                const res=await fetch(`${BIN_URL}/latest`,{headers:HEADERS});
+                const json=await res.json();
+                const d=json.record;
+                if(d&&d.dataPoints&&d.dataPoints.length>0){
+                    targetPoints=d.dataPoints;timestamps=d.timestamps||[];
+                    if(d.totalToday&&d.totalToday>totalToday)totalToday=d.totalToday;
+                    document.getElementById('totalToday').textContent=totalToday.toLocaleString();
+                    if(targetPoints.length>0){
+                        const newVal=Math.round(targetPoints[targetPoints.length-1]);
+                        document.getElementById('currentVisitors').textContent=newVal.toLocaleString();
+                        if(targetPoints.length>1){
+                            const prev=targetPoints[targetPoints.length-2];
+                            const pct=((newVal-prev)/prev*100).toFixed(1);
+                            const ce=document.getElementById('changePercent');ce.textContent=(pct>0?'+':'')+pct+'%';ce.className='stat-val '+(pct>=0?'up':'down');
+                        }
+                    }
+                    startSmoothAnimation();
+                }
+            }catch(e){}
+        }
+
+        drawGraph();
+        setInterval(updateGraph,1000);
+        setInterval(syncFromServer,2000);
 
         // ============ OTHER SCRIPTS ============
         const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');if(e.target.classList.contains('stagger-reveal'))e.target.classList.add('visible')}})},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
