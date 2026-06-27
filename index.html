@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shivam Sharma — The Greatest of the Greatest</title>
 
+    <!-- OG Meta Tags -->
+    <meta property="og:title" content="Shivam Sharma — The Greatest of the Greatest">
+    <meta property="og:description" content="I don't chase expectations. Expectations chase me.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Shivam Sharma — The Greatest of the Greatest">
+    <meta name="twitter:description" content="I don't chase expectations. Expectations chase me.">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -75,6 +83,38 @@
             z-index: 0; pointer-events: none; opacity: 0.5;
         }
 
+        /* Scroll Progress Bar */
+        #scrollProgress {
+            position: fixed; top: 0; left: 0; height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            z-index: 1001; transition: width 0.1s ease;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* Back to Top */
+        #backToTop {
+            position: fixed; bottom: 28px; right: 28px; z-index: 999;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            color: var(--text); font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #backToTop.visible { opacity: 1; visibility: visible; }
+        #backToTop:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); transform: translateY(-3px); }
+
+        /* Visitor Counter */
+        #visitorCounter {
+            position: fixed; bottom: 28px; left: 28px; z-index: 999;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+            padding: 8px 16px; border-radius: 100px; font-size: 0.68rem;
+            color: var(--text-muted); font-family: var(--font-mono);
+            pointer-events: none; white-space: nowrap;
+        }
+        #visitorCounter span { color: var(--gold); font-weight: 700; }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.04); border-radius: 10px; }
@@ -96,7 +136,7 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 1; }
 
-        /* Nav - Full width old style with outline */
+        /* Nav */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -107,7 +147,6 @@
             -webkit-backdrop-filter: var(--nav-blur);
             border-bottom: 1px solid rgba(255,255,255,0.06);
         }
-        [data-theme="light"] nav.scrolled { border-bottom-color: rgba(0,0,0,0.05); }
         .nav-inner {
             display: flex; justify-content: space-between; align-items: center;
             height: 64px; max-width: 1000px; margin: 0 auto; padding: 0 28px; gap: 16px;
@@ -126,7 +165,6 @@
             border-radius: 100px;
         }
         .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.04); }
-
         .theme-toggle {
             width: 42px; height: 26px; border-radius: 100px; cursor: pointer;
             background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
@@ -244,6 +282,44 @@
         .quote-author { color: var(--text-muted); font-size: 0.76rem; font-family: var(--font-mono); position: relative; z-index: 1; }
         .quote-author .name { color: var(--accent); font-weight: 700; }
 
+        /* Pricing */
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 10px; }
+        .pricing-card { padding: 28px 22px; text-align: center; }
+        .pricing-card.featured { border-color: var(--accent2); position: relative; }
+        .pricing-card.featured::before {
+            content: 'BEST VALUE'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            background: var(--accent2); color: #fff; font-size: 0.6rem; font-weight: 700;
+            padding: 4px 14px; border-radius: 100px; letter-spacing: 0.1em; font-family: var(--font-mono);
+        }
+        .pricing-tier { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; font-family: var(--font-mono); }
+        .pricing-price { font-size: 2rem; font-weight: 900; color: var(--text); margin-bottom: 4px; font-family: var(--font-grotesk); }
+        .pricing-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; }
+        .pricing-features { list-style: none; text-align: left; margin-bottom: 16px; }
+        .pricing-features li { font-size: 0.72rem; color: var(--text-secondary); padding: 4px 0; display: flex; align-items: center; gap: 6px; }
+        .pricing-features li::before { content: '✓'; color: var(--accent2); font-weight: 700; flex-shrink: 0; }
+        .pricing-card .btn { width: 100%; justify-content: center; font-size: 0.8rem; padding: 10px 20px; }
+
+        /* No-Do List */
+        .nodo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .nodo-item {
+            display: flex; align-items: center; gap: 10px; padding: 14px 18px;
+            font-size: 0.88rem; color: var(--text-secondary);
+        }
+        .nodo-item .nodo-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+        /* Availability */
+        .availability-card { padding: 22px 28px; display: inline-flex; align-items: center; gap: 12px; margin-top: 6px; }
+        .availability-dot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+            animation: pulse-avail 2s infinite;
+        }
+        .availability-dot.busy { background: #f0b933; box-shadow: 0 0 10px rgba(240,185,51,0.5); }
+        @keyframes pulse-avail {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .availability-text { font-size: 0.88rem; color: var(--text); font-weight: 600; }
+
         #collab { position: relative; }
         .collab-card { padding: 36px 32px; max-width: 580px; margin: 0 auto; }
         .collab-card h2 { font-size: 1.8rem; margin-bottom: 0; text-align: center; }
@@ -300,12 +376,15 @@
         footer .footer-note { font-size: 0.6rem; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); line-height: 1.5; max-width: 440px; margin-left: auto; margin-right: auto; }
 
         @media (max-width: 860px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid, .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+            .nodo-grid { grid-template-columns: 1fr; }
             .contact-grid { grid-template-columns: 1fr 1fr; }
             .hero-title { font-size: 3rem; }
             h2 { font-size: 1.9rem; }
             .container { padding: 0 20px; }
             .nav-inner { padding: 0 20px; }
+            #visitorCounter { bottom: 20px; left: 16px; font-size: 0.62rem; padding: 6px 12px; }
+            #backToTop { bottom: 20px; right: 16px; width: 38px; height: 38px; }
         }
         @media (max-width: 600px) {
             .container { padding: 0 16px; }
@@ -327,9 +406,10 @@
             #hero { min-height: 85vh; }
             .btn-group { flex-direction: column; gap: 8px; }
             .btn { width: 100%; justify-content: center; padding: 12px 22px; font-size: 0.84rem; }
-            .stats-grid { grid-template-columns: 1fr; gap: 8px; }
-            .stat-card { padding: 20px 18px; }
+            .stats-grid, .pricing-grid { grid-template-columns: 1fr; gap: 8px; }
+            .stat-card, .pricing-card { padding: 20px 18px; }
             .stat-number { font-size: 1.8rem; }
+            .nodo-grid { grid-template-columns: 1fr; }
             .contact-grid { grid-template-columns: 1fr; gap: 8px; }
             .contact-card { padding: 14px 18px; }
             .collab-form-row { grid-template-columns: 1fr; }
@@ -342,10 +422,16 @@
             footer { padding: 26px 0 24px; }
             footer .footer-links { gap: 14px; }
             footer .footer-links a { font-size: 0.72rem; }
+            #visitorCounter { bottom: 16px; left: 10px; font-size: 0.58rem; padding: 5px 10px; }
+            #backToTop { bottom: 16px; right: 10px; width: 34px; height: 34px; font-size: 1rem; }
         }
     </style>
 </head>
 <body>
+
+    <div id="scrollProgress"></div>
+    <div id="visitorCounter">👀 Visitors: <span>1,247,893</span> (since last refresh)</div>
+    <button id="backToTop" aria-label="Back to top">↑</button>
 
     <canvas id="bgCanvas"></canvas>
 
@@ -355,6 +441,9 @@
             <div class="nav-right">
                 <ul class="nav-links">
                     <li><a href="#about">About</a></li>
+                    <li><a href="#stats">Stats</a></li>
+                    <li><a href="#pricing">Hire Me</a></li>
+                    <li><a href="#nodo">Won't Do</a></li>
                     <li><a href="#collab">Collab</a></li>
                 </ul>
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
@@ -448,6 +537,82 @@
         </div>
     </section>
 
+    <!-- Pricing Table -->
+    <section id="pricing">
+        <div class="container">
+            <span class="section-badge reveal">💼 Hire Me (Terms Apply)</span>
+            <h2 class="reveal">Investment plans for accessing greatness.</h2>
+            <p class="reveal" style="margin-bottom: 4px;">
+                <span class="savage">All prices non-negotiable. Results guaranteed. Refunds? Cute.</span>
+            </p>
+            <div class="pricing-grid stagger-reveal reveal">
+                <div class="glass-card pricing-card">
+                    <div class="pricing-tier">Basic</div>
+                    <div class="pricing-price">₹Free.99</div>
+                    <div class="pricing-desc">For those testing the waters</div>
+                    <ul class="pricing-features">
+                        <li>5 seconds of my attention</li>
+                        <li>One (1) vague life advice</li>
+                        <li>Nod of acknowledgment</li>
+                    </ul>
+                </div>
+                <div class="glass-card pricing-card featured">
+                    <div class="pricing-tier">Pro</div>
+                    <div class="pricing-price">1 Coffee</div>
+                    <div class="pricing-desc">For serious inquiries only</div>
+                    <ul class="pricing-features">
+                        <li>10 min consultation</li>
+                        <li>Personalized vague advice</li>
+                        <li>1 sarcastic compliment included</li>
+                    </ul>
+                </div>
+                <div class="glass-card pricing-card">
+                    <div class="pricing-tier">Ultimate</div>
+                    <div class="pricing-price">Your Company</div>
+                    <div class="pricing-desc">Full access. No limits.</div>
+                    <ul class="pricing-features">
+                        <li>I become CEO</li>
+                        <li>You report to me</li>
+                        <li>Company renamed after me</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Things I Don't Do -->
+    <section id="nodo" style="background: var(--bg-alt);">
+        <div class="container">
+            <span class="section-badge reveal">🚫 Hard Boundaries</span>
+            <h2 class="reveal">Things I absolutely won't do.</h2>
+            <p class="reveal" style="margin-bottom: 6px;">
+                <span class="savage">Don't even ask. The answer is no. With a laugh track.</span>
+            </p>
+            <div class="nodo-grid stagger-reveal reveal">
+                <div class="glass-card nodo-item"><span class="nodo-icon">⏰</span> Wake up early (unless absolutely necessary)</div>
+                <div class="glass-card nodo-item"><span class="nodo-icon">🎭</span> Pretend to care about things I don't</div>
+                <div class="glass-card nodo-item"><span class="nodo-icon">🏆</span> Lose arguments (statistically impossible)</div>
+                <div class="glass-card nodo-item"><span class="nodo-icon">💼</span> Use LinkedIn unironically</div>
+                <div class="glass-card nodo-item"><span class="nodo-icon">📉</span> Underestimate my own potential</div>
+                <div class="glass-card nodo-item"><span class="nodo-icon">🙅</span> Apologize for being right</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Availability -->
+    <section id="availability">
+        <div class="container">
+            <span class="section-badge reveal">🟡 Live Status</span>
+            <h2 class="reveal">My current availability.</h2>
+            <div class="reveal">
+                <div class="glass-card availability-card">
+                    <div class="availability-dot busy"></div>
+                    <div class="availability-text">Busy doing nothing important. Try again later. Or don't. I'm not your manager.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="collab">
         <div class="container">
             <span class="section-badge reveal" style="display:table; margin-left:auto; margin-right:auto;">🙏 The Desperate Corner</span>
@@ -526,7 +691,8 @@
                 <li><a href="#hero">Home</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#stats">Stats</a></li>
-                <li><a href="#testimonials">Praise</a></li>
+                <li><a href="#pricing">Hire Me</a></li>
+                <li><a href="#nodo">Won't Do</a></li>
                 <li><a href="#collab">Collab</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
@@ -540,6 +706,7 @@
     </footer>
 
     <script>
+        // Background Canvas
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -596,16 +763,79 @@
         }
         animate();
 
+        // Scroll Reveal
         const observer = new IntersectionObserver(entries=>{
             entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');if(e.target.classList.contains('stagger-reveal'))e.target.classList.add('visible');}});
         },{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
         document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 
+        // Nav Scroll
         const nav=document.getElementById('navbar');
         window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>50));
 
+        // Theme Toggle
         const toggle=document.getElementById('themeToggle'), html=document.documentElement;
         toggle.addEventListener('click',()=>{html.setAttribute('data-theme',html.getAttribute('data-theme')==='dark'?'light':'dark');});
+
+        // Scroll Progress Bar
+        const progressBar = document.getElementById('scrollProgress');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            progressBar.style.width = progress + '%';
+        });
+
+        // Back to Top
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 400);
+        });
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Tab Title Animation
+        const originalTitle = document.title;
+        const funnyTitle = 'Hey! Come back 👑';
+        let titleInterval;
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                titleInterval = setInterval(() => {
+                    document.title = document.title === originalTitle ? funnyTitle : originalTitle;
+                }, 1500);
+            } else {
+                clearInterval(titleInterval);
+                document.title = originalTitle;
+            }
+        });
+
+        // Visitor Counter Randomizer
+        const visitorSpan = document.querySelector('#visitorCounter span');
+        setInterval(() => {
+            const base = 1247893;
+            const random = Math.floor(Math.random() * 50) - 25;
+            visitorSpan.textContent = (base + random).toLocaleString();
+        }, 3000);
+
+        // Pull to Refresh Message (Mobile)
+        let touchStartY = 0;
+        document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+        document.addEventListener('touchmove', e => {
+            const touchY = e.touches[0].clientY;
+            if (window.scrollY === 0 && touchY - touchStartY > 100) {
+                const msg = document.createElement('div');
+                msg.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--accent2);color:#fff;padding:10px 24px;border-radius:100px;z-index:9999;font-family:var(--font-grotesk);font-weight:700;font-size:0.85rem;animation:fadeInOut 2s forwards;';
+                msg.textContent = '🤷 Refreshing won\'t make you greater. But okay.';
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 2000);
+            }
+        }, { passive: true });
+
+        // Add fadeInOut keyframes
+        const styleEl = document.createElement('style');
+        styleEl.textContent = '@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(-10px)}20%{opacity:1;transform:translateX(-50%) translateY(0)}80%{opacity:1}100%{opacity:0}}';
+        document.head.appendChild(styleEl);
     </script>
 </body>
 </html>
