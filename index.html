@@ -70,7 +70,6 @@
             transition: background 0.6s ease, color 0.6s ease;
         }
 
-        /* Animated Background Canvas */
         #bgCanvas {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 0; pointer-events: none; opacity: 0.5;
@@ -87,7 +86,6 @@
         }
         .reveal.visible { opacity: 1; transform: translateY(0); }
 
-        /* Staggered children reveal */
         .stagger-reveal > * { opacity: 0; transform: translateY(40px); transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1); }
         .stagger-reveal.visible > *:nth-child(1) { transition-delay: 0s; opacity: 1; transform: translateY(0); }
         .stagger-reveal.visible > *:nth-child(2) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
@@ -98,7 +96,6 @@
 
         .container { max-width: 1000px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
 
-        /* Nav */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -139,7 +136,6 @@
         }
         [data-theme="light"] .theme-toggle::after { left: 25px; }
 
-        /* Sections */
         section { padding: 100px 0; position: relative; }
         section:first-of-type { padding-top: 150px; }
         .section-badge {
@@ -160,7 +156,6 @@
         .blue-text { color: var(--accent); font-weight: 600; }
         .gold-text { color: var(--gold); font-weight: 600; }
 
-        /* Glass Card */
         .glass-card {
             background: var(--glass-bg); border: 1px solid var(--glass-border);
             backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
@@ -172,7 +167,6 @@
         }
         [data-theme="light"] .glass-card:hover { box-shadow: 0 20px 50px rgba(0,0,0,0.06); }
 
-        /* Hero */
         #hero { min-height: 100vh; display: flex; align-items: center; }
         .hero-content { max-width: 680px; }
         .hero-pill {
@@ -226,7 +220,6 @@
         }
         .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
-        /* About */
         #about { background: var(--bg-alt); transition: background 0.6s; }
         .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
         .about-box { padding: 30px; }
@@ -239,7 +232,6 @@
         .status-list li:last-child { border-bottom: none; }
         .status-list li .s-icon { font-size: 1.1rem; flex-shrink: 0; }
 
-        /* Stats */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px; }
         .stat-card { padding: 30px 24px; text-align: left; }
         .stat-number {
@@ -251,7 +243,6 @@
         .stat-label { font-size: 0.92rem; color: var(--text); font-weight: 700; margin-bottom: 3px; }
         .stat-sub { font-size: 0.76rem; color: var(--text-muted); line-height: 1.5; }
 
-        /* Testimonials */
         #testimonials { background: var(--bg-alt); transition: background 0.6s; }
         .testimonial-grid { display: grid; gap: 14px; }
         .quote-card { padding: 30px 34px; position: relative; }
@@ -264,7 +255,6 @@
         .quote-author { color: var(--text-muted); font-size: 0.8rem; font-family: var(--font-mono); position: relative; z-index: 1; }
         .quote-author .name { color: var(--accent); font-weight: 700; }
 
-        /* Collab */
         #collab { position: relative; }
         .collab-card { padding: 44px 40px; max-width: 620px; margin: 0 auto; }
         .collab-card h2 { font-size: 2rem; margin-bottom: 0; text-align: center; }
@@ -300,7 +290,6 @@
         .collab-form .btn { width: 100%; justify-content: center; padding: 16px; font-size: 0.95rem; margin-top: 8px; }
         .collab-note { margin-top: 16px; font-size: 0.65rem; color: var(--text-muted); text-align: center; line-height: 1.6; }
 
-        /* Contact */
         .contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
         .contact-card {
             padding: 20px 24px; text-decoration: none; display: flex;
@@ -310,7 +299,6 @@
         .contact-card .c-label { color: var(--text-muted); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-bottom: 2px; }
         .contact-card .c-value { color: var(--text); font-weight: 500; font-size: 0.88rem; word-break: break-all; }
 
-        /* Footer */
         footer {
             padding: 44px 0 36px; text-align: center; color: var(--text-muted);
             font-size: 0.82rem; border-top: 1px solid var(--glass-border);
@@ -557,7 +545,6 @@
     </footer>
 
     <script>
-        // ============ ANIMATED BACKGROUND ============
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -581,13 +568,11 @@
                 this.speedX = (Math.random() - 0.5) * 0.4;
                 this.speedY = (Math.random() - 0.5) * 0.4;
                 this.opacity = Math.random() * 0.5 + 0.1;
-                this.hue = Math.random() > 0.5 ? 230 : 270; // Blue or Violet
+                this.hue = Math.random() > 0.5 ? 230 : 270;
             }
             update() {
                 this.x += this.speedX;
                 this.y += this.speedY;
-
-                // Mouse attraction
                 const dx = mouseX - this.x;
                 const dy = mouseY - this.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
@@ -595,7 +580,6 @@
                     this.x += dx * 0.005;
                     this.y += dy * 0.005;
                 }
-
                 if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) {
                     this.reset();
                 }
@@ -605,8 +589,6 @@
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fillStyle = `hsla(${this.hue}, 70%, 65%, ${this.opacity})`;
                 ctx.fill();
-
-                // Glow
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
                 ctx.fillStyle = `hsla(${this.hue}, 70%, 65%, ${this.opacity * 0.15})`;
@@ -614,7 +596,6 @@
             }
         }
 
-        // Create particles
         for (let i = 0; i < 120; i++) {
             particles.push(new Particle());
         }
@@ -626,8 +607,6 @@
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw connections
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
@@ -643,18 +622,15 @@
                     }
                 }
             }
-
             particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
         animate();
 
-        // ============ SCROLL REVEAL ============
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(e => {
                 if (e.isIntersecting) {
                     e.target.classList.add('visible');
-                    // Also trigger stagger children
                     if (e.target.classList.contains('stagger-reveal')) {
                         e.target.classList.add('visible');
                     }
@@ -663,21 +639,13 @@
         }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // ============ NAV SCROLL ============
         const nav = document.getElementById('navbar');
         window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 50));
 
-        // ============ THEME TOGGLE ============
         const toggle = document.getElementById('themeToggle');
         const html = document.documentElement;
         toggle.addEventListener('click', () => {
             html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-        });
-
-        // ============ FORM ============
-        document.querySelector('.collab-form').addEventListener('submit', e => {
-            e.preventDefault();
-            alert('📬 Submission portal offline.\n\nFormspree integration pending.\nYour proposal is safe... for now.');
         });
     </script>
 </body>
